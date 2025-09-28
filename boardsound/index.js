@@ -19,8 +19,8 @@ const STP_FILES = [
 ];
 
 const NSTP_FILES = [
-  "syfm.mp3",
-  "you-stupid-n.mp3"
+  "s-y-f-m.mp3",
+  "you-stupid.mp3"
 ];
 
 const allAudios = [];
