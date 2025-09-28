@@ -1,6 +1,6 @@
 const soundDirs = {
-  stp: "/core/files/soundboard/stp/",
-  nstp: "/core/files/soundboard/nstp/"
+  stp: "/static/stuff/soundboard/stp/",
+  nstp: "/static/stuff/soundboard/nstp/"
 };
 
 const STP_FILES = [
