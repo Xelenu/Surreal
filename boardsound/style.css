@@ -1,0 +1,13 @@
+:root { --btn-w: 150px; --btn-h: 80px; --gap: 12px; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 20px; background: #111; color: #fff; font-family: system-ui, sans-serif; }
+h2 { margin: 20px 0 10px; }
+.grid { display: grid; grid-gap: var(--gap); margin-bottom: 30px; }
+.button {
+  width: var(--btn-w); height: var(--btn-h);
+  display: grid; place-items: center;
+  background: #2a2a2a; color: #fff; border: none; border-radius: 12px; cursor: pointer;
+  font-size: 16px; font-weight: 600; transition: transform .06s ease, background .15s ease; user-select: none;
+}
+.button:hover { background: #3a3a3a; }
+.button:active { transform: scale(.98); }
