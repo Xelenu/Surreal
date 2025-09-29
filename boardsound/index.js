@@ -15,6 +15,7 @@ const STP_FILES = [
   "metal-pipe-clang.mp3",
   "notification.mp3",
   "smoke-detector-beep.mp3",
+  "youre-fu.mp3",
   "tuco-get-out.mp3"
 ];
 
