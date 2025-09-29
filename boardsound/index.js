@@ -75,7 +75,7 @@ masterGain.connect(audioCtx.destination);
   }
 
   addSlider("Bass Boost", -10, 24, 1, 0, v => { bassFilter.gain.value = parseInt(v, 10) || 0; });
-  addSlider("Volume", 0, 100, 1, 100, v => { masterGain.gain.value = (parseInt(v, 10) || 0) / 100; });
+  addSlider("Volume", 0, 300, 1, 100, v => { masterGain.gain.value = (parseInt(v, 10) || 0) / 100; });
 
   document.body.insertBefore(wrap, document.body.firstChild);
 })();
