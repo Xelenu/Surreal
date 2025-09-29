@@ -47,7 +47,7 @@ bassFilter.connect(audioCtx.destination);
   const slider = document.createElement("input");
   slider.type = "range";
   slider.min = "-10";
-  slider.max = "24";
+  slider.max = "48";
   slider.step = "1";
   slider.value = "0";
   slider.style.width = "220px";
