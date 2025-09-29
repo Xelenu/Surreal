@@ -19,17 +19,62 @@ const STP_FILES = [
 ];
 
 const NSTP_FILES = [
-  "syfm.mp3",
-  "you-stupid-n.mp3"
+  "s-y-f-m.mp3",
+  "you-stupid.mp3"
 ];
 
 const allAudios = [];
 
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+const bassFilter = audioCtx.createBiquadFilter();
+bassFilter.type = "lowshelf";
+bassFilter.frequency.value = 150;
+bassFilter.gain.value = 0;
+bassFilter.connect(audioCtx.destination);
+
+(function injectBassUI() {
+  const wrap = document.createElement("div");
+  wrap.style.display = "flex";
+  wrap.style.alignItems = "center";
+  wrap.style.gap = "10px";
+  wrap.style.margin = "10px 0 20px";
+
+  const label = document.createElement("label");
+  label.textContent = "Bass Boost";
+  label.style.minWidth = "90px";
+
+  const slider = document.createElement("input");
+  slider.type = "range";
+  slider.min = "-10";
+  slider.max = "24";
+  slider.step = "1";
+  slider.value = "0";
+  slider.style.width = "220px";
+  slider.setAttribute("aria-label", "Bass Boost (dB)");
+
+  const val = document.createElement("span");
+  val.textContent = "0 dB";
+  val.style.minWidth = "48px";
+
+  slider.addEventListener("input", () => {
+    const db = parseInt(slider.value, 10) || 0;
+    bassFilter.gain.value = db;
+    val.textContent = db + " dB";
+  });
+
+  wrap.appendChild(label);
+  wrap.appendChild(slider);
+  wrap.appendChild(val);
+  document.body.insertBefore(wrap, document.body.firstChild);
+})();
+
 function formatLabel(filename) {
   const base = decodeURIComponent(filename).replace(/\.[^/.]+$/, "");
-  return base.replace(/[-_]+/g, " ").split(" ")
-    .map(w => w ? w[0].toUpperCase() + w.slice(1) : w)
-    .join(" ");
+  return base.replace(/[-_]+/g, " ")
+             .split(" ")
+             .map(w => (w ? w[0].toUpperCase() + w.slice(1) : w))
+             .join(" ");
 }
 
 function createSoundGrid(containerId, cols, count) {
@@ -48,6 +93,12 @@ function createSoundGrid(containerId, cols, count) {
   }
 }
 
+function attachAudioToGraph(mediaEl) {
+  const src = audioCtx.createMediaElementSource(mediaEl);
+  src.connect(bassFilter);
+  return src;
+}
+
 function assignSoundByIndex(containerId, index, fullUrl, label) {
   const cols = getComputedStyle(document.getElementById(containerId)).gridTemplateColumns.split(" ").length || 3;
   const r = Math.floor(index / cols);
@@ -57,8 +108,13 @@ function assignSoundByIndex(containerId, index, fullUrl, label) {
   if (!btn) return;
   if (label) btn.textContent = label;
   const audio = new Audio(fullUrl);
+  audio.preload = "auto";
   allAudios.push(audio);
-  btn.onclick = () => {
+  attachAudioToGraph(audio);
+  btn.onclick = async () => {
+    if (audioCtx.state !== "running") {
+      await audioCtx.resume();
+    }
     audio.currentTime = 0;
     audio.play();
   };
@@ -72,14 +128,10 @@ function buildBoardFromList(containerId, folderKey, files, cols = 3) {
   });
 }
 
-// stop all sounds when space is pressed
 document.addEventListener("keydown", e => {
   if (e.code === "Space") {
-    e.preventDefault(); // prevent page scroll
-    allAudios.forEach(a => {
-      a.pause();
-      a.currentTime = 0;
-    });
+    e.preventDefault();
+    allAudios.forEach(a => { a.pause(); a.currentTime = 0; });
   }
 });
 
