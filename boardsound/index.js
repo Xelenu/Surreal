@@ -16,6 +16,7 @@ const STP_FILES = [
   "notification.mp3",
   "smoke-detector-beep.mp3",
   "youre-fu.mp3",
+  "get-out-of-my-car-now.mp3",
   "tuco-get-out.mp3"
 ];
 
@@ -32,41 +33,50 @@ const bassFilter = audioCtx.createBiquadFilter();
 bassFilter.type = "lowshelf";
 bassFilter.frequency.value = 150;
 bassFilter.gain.value = 0;
-bassFilter.connect(audioCtx.destination);
+const masterGain = audioCtx.createGain();
+masterGain.gain.value = 1;
+bassFilter.connect(masterGain);
+masterGain.connect(audioCtx.destination);
 
-(function injectBassUI() {
+(function injectControls() {
   const wrap = document.createElement("div");
   wrap.style.display = "flex";
+  wrap.style.flexWrap = "wrap";
   wrap.style.alignItems = "center";
-  wrap.style.gap = "10px";
+  wrap.style.gap = "16px";
   wrap.style.margin = "10px 0 20px";
 
-  const label = document.createElement("label");
-  label.textContent = "Bass Boost";
-  label.style.minWidth = "90px";
+  function addSlider(labelText, min, max, step, value, onInput) {
+    const group = document.createElement("div");
+    group.style.display = "flex";
+    group.style.alignItems = "center";
+    group.style.gap = "10px";
+    const label = document.createElement("label");
+    label.textContent = labelText;
+    label.style.minWidth = "95px";
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = String(min);
+    slider.max = String(max);
+    slider.step = String(step);
+    slider.value = String(value);
+    slider.style.width = "220px";
+    const val = document.createElement("span");
+    val.style.minWidth = "60px";
+    val.textContent = labelText === "Bass Boost" ? value + " dB" : value + "%";
+    slider.addEventListener("input", () => {
+      onInput(slider.value);
+      val.textContent = labelText === "Bass Boost" ? slider.value + " dB" : slider.value + "%";
+    });
+    group.appendChild(label);
+    group.appendChild(slider);
+    group.appendChild(val);
+    wrap.appendChild(group);
+  }
 
-  const slider = document.createElement("input");
-  slider.type = "range";
-  slider.min = "-10";
-  slider.max = "48";
-  slider.step = "1";
-  slider.value = "0";
-  slider.style.width = "220px";
-  slider.setAttribute("aria-label", "Bass Boost (dB)");
+  addSlider("Bass Boost", -10, 24, 1, 0, v => { bassFilter.gain.value = parseInt(v, 10) || 0; });
+  addSlider("Volume", 0, 100, 1, 100, v => { masterGain.gain.value = (parseInt(v, 10) || 0) / 100; });
 
-  const val = document.createElement("span");
-  val.textContent = "0 dB";
-  val.style.minWidth = "48px";
-
-  slider.addEventListener("input", () => {
-    const db = parseInt(slider.value, 10) || 0;
-    bassFilter.gain.value = db;
-    val.textContent = db + " dB";
-  });
-
-  wrap.appendChild(label);
-  wrap.appendChild(slider);
-  wrap.appendChild(val);
   document.body.insertBefore(wrap, document.body.firstChild);
 })();
 
@@ -113,9 +123,7 @@ function assignSoundByIndex(containerId, index, fullUrl, label) {
   allAudios.push(audio);
   attachAudioToGraph(audio);
   btn.onclick = async () => {
-    if (audioCtx.state !== "running") {
-      await audioCtx.resume();
-    }
+    if (audioCtx.state !== "running") await audioCtx.resume();
     audio.currentTime = 0;
     audio.play();
   };
